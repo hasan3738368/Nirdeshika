@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>নির্দেশিকা - AI প্রম্পট জেনারেটর</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #008080 0%, #4B0082 100%);
+        }
+        .primary-color {
+            color: #008080;
+        }
+        .accent-color {
+            background-color: #FF7F50;
+        }
+        .accent-color:hover {
+            background-color: #FF6347;
+        }
+        .primary-bg {
+            background-color: #008080;
+        }
+        .primary-bg:hover {
+            background-color: #006666;
+        }
+        
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #008080 0%, #4B0082 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        .splash-logo {
+            font-size: 3rem;
+            color: white;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+        .splash-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2rem;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        
+        /* Onboarding Modal */
+        .onboarding-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+        }
+        .onboarding-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+        .onboarding-slide {
+            display: none;
+        }
+        .onboarding-slide.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Input & Button Styles */
+        .input-box {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        .input-box:focus {
+            border-color: #008080;
+            box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1);
+        }
+        .result-box {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #008080;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #008080 0%, #4B0082 100%);
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 128, 128, 0.3);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #FF7F50 0%, #FFD700 100%);
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 127, 80, 0.3);
+        }
+        
+        /* Navigation */
+        .nav-item {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .nav-item:hover {
+            background-color: rgba(0, 128, 128, 0.1);
+        }
+        .nav-item.active {
+            background-color: rgba(0, 128, 128, 0.2);
+            color: #008080;
+        }
+        
+        /* Feature Cards */
+        .feature-card {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* History Items */
+        .history-item {
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        .history-item:hover {
+            border-left-color: #008080;
+            background-color: #f8fafc;
+        }
+        
+        /* Template Cards */
+        .template-card {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .template-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Page Transitions */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .splash-logo {
+                font-size: 2rem;
+            }
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+            .nav-container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-logo">নির্দেশিকা</div>
+        <div class="splash-subtitle">AI প্রম্পট জেনারেটর</div>
+        <div class="mt-8">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Onboarding Modal -->
+    <div id="onboardingModal" class="onboarding-modal" style="display: none;">
+        <div class="onboarding-content">
+            <!-- Slide 1 -->
+            <div class="onboarding-slide active" id="slide1">
+                <div class="text-6xl mb-4">✍️</div>
+                <h3 class="text-2xl font-bold primary-color mb-4">আপনার কথা লিখুন</h3>
+                <p class="text-gray-600 mb-6">আপনার মনের ভাব সহজ বাংলায় লিখুন। জটিল করার দরকার নেই!</p>
+                <div class="flex justify-between">
+                    <div class="w-8"></div>
+                    <button onclick="nextSlide()" class="btn-primary text-white px-6 py-2 rounded-lg">
+                        পরবর্তী <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="onboarding-slide" id="slide2">
+                <div class="text-6xl mb-4">🎯</div>
+                <h3 class="text-2xl font-bold primary-color mb-4">প্রম্পট তৈরি করুন</h3>
+                <p class="text-gray-600 mb-6">আমাদের AI আপনার সাধারণ কথাকে পেশাদার প্রম্পটে রূপান্তর করবে।</p>
+                <div class="flex justify-between">
+                    <button onclick="prevSlide()" class="btn-secondary text-white px-6 py-2 rounded-lg">
+                        <i class="fas fa-arrow-left mr-2"></i> পূর্ববর্তী
+                    </button>
+                    <button onclick="nextSlide()" class="btn-primary text-white px-6 py-2 rounded-lg">
+                        পরবর্তী <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="onboarding-slide" id="slide3">
+                <div class="text-6xl mb-4">📋</div>
+                <h3 class="text-2xl font-bold primary-color mb-4">কপি করে ব্যবহার করুন</h3>
+                <p class="text-gray-600 mb-6">তৈরি হওয়া প্রফেশনাল প্রম্পট কপি করে যেকোনো AI তে ব্যবহার করুন!</p>
+                <div class="flex justify-between">
+                    <button onclick="prevSlide()" class="btn-secondary text-white px-6 py-2 rounded-lg">
+                        <i class="fas fa-arrow-left mr-2"></i> পূর্ববর্তী
+                    </button>
+                    <button onclick="startApp()" class="btn-primary text-white px-6 py-2 rounded-lg">
+                        শুরু করুন <i class="fas fa-rocket ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Skip Button -->
+            <button onclick="startApp()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="mainApp" style="display: none;">
+        <!-- Navigation Header -->
+        <header class="bg-white shadow-lg sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold primary-color">নির্দেশিকা</h1>
+                        <span class="ml-2 text-sm bg-green-100 text-green-600 px-2 py-1 rounded-full">v2.0</span>
+                    </div>
+                    
+                    <!-- Desktop Navigation -->
+                    <nav class="hidden md:flex nav-container space-x-2">
+                        <div class="nav-item active px-4 py-2 rounded-lg" onclick="showPage('home')">
+                            <i class="fas fa-home mr-2"></i> হোম
+                        </div>
+                        <div class="nav-item px-4 py-2 rounded-lg" onclick="showPage('generator')">
+                            <i class="fas fa-magic mr-2"></i> জেনারেটর
+                        </div>
+                        <div class="nav-item px-4 py-2 rounded-lg" onclick="showPage('history')">
+                            <i class="fas fa-history mr-2"></i> হিস্টরি
+                        </div>
+                        <div class="nav-item px-4 py-2 rounded-lg" onclick="showPage('templates')">
+                            <i class="fas fa-file-alt mr-2"></i> টেমপ্লেট
+                        </div>
+                    </nav>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="md:hidden" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Mobile Navigation -->
+                <nav id="mobileNav" class="md:hidden mt-4 space-y-2" style="display: none;">
+                    <div class="nav-item active px-4 py-2 rounded-lg" onclick="showPage('home'); toggleMobileMenu()">
+                        <i class="fas fa-home mr-2"></i> হোম
+                    </div>
+                    <div class="nav-item px-4 py-2 rounded-lg" onclick="showPage('generator'); toggleMobileMenu()">
+                        <i class="fas fa-magic mr-2"></i> জেনারেটর
+                    </div>
+                    <div class="nav-item px-4 py-2 rounded-lg" onclick="showPage('history'); toggleMobileMenu()">
+                        <i class="fas fa-history mr-2"></i> হিস্টরি
+                    </div>
+                    <div class="nav-item px-4 py-2 rounded-lg" onclick="showPage('templates'); toggleMobileMenu()">
+                        <i class="fas fa-file-alt mr-2"></i> টেমপ্লেট
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Home Page -->
+        <div id="homePage" class="page active">
+            <!-- Hero Section -->
+            <section class="hero-gradient text-white py-20">
+                <div class="container mx-auto px-4 text-center">
+                    <h1 class="hero-title text-5xl font-bold mb-6">নির্দেশিকা</h1>
+                    <p class="text-xl mb-8 opacity-90">AI থেকে ভালো ফলাফল পেতে চান? আপনার সাধারণ কথাকে পেশাদার প্রম্পটে রূপান্তর করুন</p>
+                    <button onclick="showPage('generator')" class="bg-white text-purple-600 font-semibold py-4 px-8 rounded-xl text-lg hover:bg-gray-100 transition-all">
+                        <i class="fas fa-rocket mr-2"></i> শুরু করুন
+                    </button>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="py-16">
+                <div class="container mx-auto px-4">
+                    <h2 class="text-3xl font-bold text-center primary-color mb-12">প্রধান ফিচারসমূহ</h2>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="feature-card bg-white rounded-2xl p-8 shadow-lg text-center">
+                            <div class="text-4xl mb-4">🎯</div>
+                            <h3 class="text-xl font-semibold mb-4 primary-color">সহজ ব্যবহার</h3>
+                            <p class="text-gray-600">কোনো জটিলতা নেই। শুধু আপনার কথা লিখুন, আমরা বাকি কাজ করে দেব।</p>
+                        </div>
+                        <div class="feature-card bg-white rounded-2xl p-8 shadow-lg text-center">
+                            <div class="text-4xl mb-4">⚡</div>
+                            <h3 class="text-xl font-semibold mb-4 primary-color">পেশাদার প্রম্পট</h3>
+                            <p class="text-gray-600">AI থেকে সর্বোচ্চ মানের ফলাফল পেতে তৈরি করা পেশাদার প্রম্পট।</p>
+                        </div>
+                        <div class="feature-card bg-white rounded-2xl p-8 shadow-lg text-center">
+                            <div class="text-4xl mb-4">🇧🇩</div>
+                            <h3 class="text-xl font-semibold mb-4 primary-color">বাংলা সাপোর্ট</h3>
+                            <p class="text-gray-600">সম্পূর্ণ বাংলা ইন্টারফেস। আপনার মাতৃভাষায় কাজ করুন।</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section class="py-16 bg-white">
+                <div class="container mx-auto px-4">
+                    <h2 class="text-3xl font-bold text-center primary-color mb-12">কিভাবে কাজ করে</h2>
+                    <div class="grid md:grid-cols-4 gap-8">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-r from-teal-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">১</div>
+                            <h3 class="text-lg font-semibold mb-2">লিখুন</h3>
+                            <p class="text-gray-600">আপনার ইচ্ছা বা প্রয়োজন সহজ বাংলায় লিখুন</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-r from-teal-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">২</div>
+                            <h3 class="text-lg font-semibold mb-2">নির্বাচন করুন</h3>
+                            <p class="text-gray-600">আপনার কাজের ধরন নির্বাচন করুন</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-r from-teal-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">৩</div>
+                            <h3 class="text-lg font-semibold mb-2">প্রম্পট পান</h3>
+                            <p class="text-gray-600">পেশাদার প্রম্পট তৈরি হয়ে যাবে</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-r from-teal-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">৪</div>
+                            <h3 class="text-lg font-semibold mb-2">ব্যবহার করুন</h3>
+                            <p class="text-gray-600">যেকোনো AI এ প্রম্পটটি ব্যবহার করুন</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Generator Page -->
+        <div id="generatorPage" class="page">
+            <div class="container mx-auto px-4 py-8 max-w-4xl">
+                <!-- Page Header -->
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold primary-color mb-2">প্রম্পট জেনারেটর</h2>
+                    <p class="text-gray-600">আপনার ধারণাকে পেশাদার প্রম্পটে রূপান্তর করুন</p>
+                </div>
+
+                <!-- Main Input Section -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+                    <label for="userInput" class="block text-lg font-semibold text-gray-700 mb-4">
+                        <i class="fas fa-edit mr-2 primary-color"></i>
+                        আপনার ধারণাটি এখানে লিখুন:
+                    </label>
+                    <textarea 
+                        id="userInput" 
+                        class="input-box w-full p-4 text-lg resize-none focus:outline-none"
+                        rows="6"
+                        placeholder="আপনি AI থেকে কী চান? যতটুকু জানেন ততটুকুই লিখুন..."
+                    ></textarea>
+                    
+                    <!-- Category Selection -->
+                    <div class="mt-6">
+                        <label for="categorySelect" class="block text-lg font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-tags mr-2 primary-color"></i>
+                            ক্যাটেগরি নির্বাচন করুন:
+                        </label>
+                        <select id="categorySelect" class="input-box w-full p-4 text-lg focus:outline-none">
+                            <option value="সাধারণ">সাধারণ</option>
+                            <option value="লেখালেখি">লেখালেখি</option>
+                            <option value="ব্যবসা">ব্যবসা</option>
+                            <option value="শিক্ষা">শিক্ষা</option>
+                            <option value="প্রোগ্রামিং">প্রোগ্রামিং</option>
+                            <option value="সৃজনশীল">সৃজনশীল</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                        <button 
+                            id="generateBtn" 
+                            class="btn-primary flex-1 text-white font-semibold py-4 px-6 rounded-xl text-lg shadow-lg"
+                        >
+                            <i class="fas fa-magic mr-2"></i>
+                            প্রম্পট তৈরি করুন
+                        </button>
+                        <button 
+                            id="clearBtn" 
+                            class="btn-secondary text-white font-semibold py-4 px-6 rounded-xl text-lg shadow-lg"
+                        >
+                            <i class="fas fa-eraser mr-2"></i>
+                            মুছে ফেলুন
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading Section -->
+                <div id="loadingSection" class="hidden bg-white rounded-2xl shadow-lg p-8 mb-6 text-center">
+                    <div class="loading-spinner mb-4"></div>
+                    <p class="text-lg text-gray-600">প্রম্পট তৈরি হচ্ছে...</p>
+                </div>
+
+                <!-- Result Section -->
+                <div id="resultSection" class="hidden bg-white rounded-2xl shadow-lg p-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold primary-color">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            তৈরি হওয়া প্রফেশনাল প্রম্পট:
+                        </h3>
+                        <div class="flex gap-2">
+                            <button 
+                                id="copyBtn" 
+                                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-all"
+                            >
+                                <i class="fas fa-copy mr-2"></i>
+                                কপি করুন
+                            </button>
+                            <button 
+                                id="saveBtn" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-all"
+                            >
+                                <i class="fas fa-save mr-2"></i>
+                                সেভ করুন
+                            </button>
+                        </div>
+                    </div>
+                    <div id="resultText" class="result-box p-6 text-gray-800 text-lg leading-relaxed min-h-32"></div>
+                    <div id="copySuccess" class="hidden mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                        <i class="fas fa-check mr-2"></i>
+                        সফলভাবে কপি হয়েছে!
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button 
+                            id="regenerateBtn" 
+                            class="btn-primary text-white font-semibold py-2 px-4 rounded-lg"
+                        >
+                            <i class="fas fa-redo mr-2"></i>
+                            আবার তৈরি করুন
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Section -->
+                <div id="errorSection" class="hidden bg-red-50 border border-red-200 rounded-2xl p-6 mt-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 mr-3 text-xl"></i>
+                        <div>
+                            <h4 class="text-red-800 font-semibold">দুঃখিত, একটি সমস্যা হয়েছে</h4>
+                            <p class="text-red-600 mt-1">আপনার ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div id="historyPage" class="page">
+            <div class="container mx-auto px-4 py-8 max-w-4xl">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold primary-color mb-2">প্রম্পট হিস্টরি</h2>
+                    <p class="text-gray-600">আপনার সেভ করা প্রম্পটগুলো দেখুন</p>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <input 
+                                type="text" 
+                                id="searchHistory" 
+                                placeholder="প্রম্পট খুঁজুন..." 
+                                class="input-box w-full p-3 focus:outline-none"
+                            >
+                        </div>
+                        <div>
+                            <select id="filterCategory" class="input-box p-3 focus:outline-none">
+                                <option value="">সব ক্যাটেগরি</option>
+                                <option value="লেখালেখি">লেখালেখি</option>
+                                <option value="ব্যবসা">ব্যবসা</option>
+                                <option value="শিক্ষা">শিক্ষা</option>
+                                <option value="প্রোগ্রামিং">প্রোগ্রামিং</option>
+                                <option value="সৃজনশীল">সৃজনশীল</option>
+                                <option value="সাধারণ">সাধারণ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History List -->
+                <div id="historyList" class="space-y-4">
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-history text-4xl mb-4"></i>
+                        <p class="text-lg">এখনো কোনো প্রম্পট সেভ করা হয়নি</p>
+                        <button onclick="showPage('generator')" class="btn-primary text-white px-6 py-2 rounded-lg mt-4">
+                            প্রথম প্রম্পট তৈরি করুন
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates Page -->
+        <div id="templatesPage" class="page">
+            <div class="container mx-auto px-4 py-8 max-w-6xl">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold primary-color mb-2">প্রি-মেড টেমপ্লেট</h2>
+                    <p class="text-gray-600">তৈরি করা টেমপ্লেট ব্যবহার করে দ্রুত শুরু করুন</p>
+                </div>
+
+                <!-- Template Categories -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Writing Templates -->
+                    <div class="template-card bg-white rounded-2xl shadow-lg p-6">
+                        <div class="text-3xl mb-4">📝</div>
+                        <h3 class="text-xl font-semibold primary-color mb-2">লেখালেখি</h3>
+                        <p class="text-gray-600 mb-4">ব্লগ, আর্টিকেল, কন্টেন্ট লেখার জন্য</p>
+                        <div class="space-y-2">
+                            <button onclick="useTemplate('blog')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-blog mr-2"></i> ব্লগ পোস্ট
+                            </button>
+                            <button onclick="useTemplate('article')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-newspaper mr-2"></i> আর্টিকেল
+                            </button>
+                            <button onclick="useTemplate('social')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-share-alt mr-2"></i> সোশ্যাল মিডিয়া
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Business Templates -->
+                    <div class="template-card bg-white rounded-2xl shadow-lg p-6">
+                        <div class="text-3xl mb-4">💼</div>
+                        <h3 class="text-xl font-semibold primary-color mb-2">ব্যবসা</h3>
+                        <p class="text-gray-600 mb-4">ব্যবসায়িক কাজের জন্য</p>
+                        <div class="space-y-2">
+                            <button onclick="useTemplate('marketing')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-bullhorn mr-2"></i> মার্কেটিং
+                            </button>
+                            <button onclick="useTemplate('email')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-envelope mr-2"></i> ইমেইল
+                            </button>
+                            <button onclick="useTemplate('proposal')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-file-contract mr-2"></i> প্রপোজাল
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Education Templates -->
+                    <div class="template-card bg-white rounded-2xl shadow-lg p-6">
+                        <div class="text-3xl mb-4">🎓</div>
+                        <h3 class="text-xl font-semibold primary-color mb-2">শিক্ষা</h3>
+                        <p class="text-gray-600 mb-4">শিক্ষামূলক কন্টেন্টের জন্য</p>
+                        <div class="space-y-2">
+                            <button onclick="useTemplate('lesson')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-chalkboard-teacher mr-2"></i> পাঠ পরিকল্পনা
+                            </button>
+                            <button onclick="useTemplate('quiz')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-question-circle mr-2"></i> কুইজ
+                            </button>
+                            <button onclick="useTemplate('explanation')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-lightbulb mr-2"></i> ব্যাখ্যা
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Programming Templates -->
+                    <div class="template-card bg-white rounded-2xl shadow-lg p-6">
+                        <div class="text-3xl mb-4">💻</div>
+                        <h3 class="text-xl font-semibold primary-color mb-2">প্রোগ্রামিং</h3>
+                        <p class="text-gray-600 mb-4">কোডিং ও ডেভেলপমেন্টের জন্য</p>
+                        <div class="space-y-2">
+                            <button onclick="useTemplate('code')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-code mr-2"></i> কোড জেনারেশন
+                            </button>
+                            <button onclick="useTemplate('debug')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-bug mr-2"></i> ডিবাগিং
+                            </button>
+                            <button onclick="useTemplate('review')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-search mr-2"></i> কোড রিভিউ
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Creative Templates -->
+                    <div class="template-card bg-white rounded-2xl shadow-lg p-6">
+                        <div class="text-3xl mb-4">🎨</div>
+                        <h3 class="text-xl font-semibold primary-color mb-2">সৃজনশীল</h3>
+                        <p class="text-gray-600 mb-4">সৃজনশীল কাজের জন্য</p>
+                        <div class="space-y-2">
+                            <button onclick="useTemplate('story')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-book mr-2"></i> গল্প লেখা
+                            </button>
+                            <button onclick="useTemplate('poem')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-feather-alt mr-2"></i> কবিতা
+                            </button>
+                            <button onclick="useTemplate('design')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-palette mr-2"></i> ডিজাইন আইডিয়া
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- General Templates -->
+                    <div class="template-card bg-white rounded-2xl shadow-lg p-6">
+                        <div class="text-3xl mb-4">⚡</div>
+                        <h3 class="text-xl font-semibold primary-color mb-2">সাধারণ</h3>
+                        <p class="text-gray-600 mb-4">সাধারণ কাজের জন্য</p>
+                        <div class="space-y-2">
+                            <button onclick="useTemplate('summary')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-compress-alt mr-2"></i> সারসংক্ষেপ
+                            </button>
+                            <button onclick="useTemplate('translation')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-language mr-2"></i> অনুবাদ
+                            </button>
+                            <button onclick="useTemplate('qa')" class="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                <i class="fas fa-question mr-2"></i> প্রশ্ন-উত্তর
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-white shadow-lg mt-12">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center">
+                    <div class="flex justify-center items-center mb-4">
+                        <div class="bg-gradient-to-r from-teal-500 to-purple-600 rounded-full p-3 mr-4">
+                            <i class="fas fa-user-tie text-white text-xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-semibold text-gray-800">ডেভেলপার</h3>
+                            <p class="text-gray-600">মোঃ শাহরুপ হাসান শরীফ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-center mb-4">
+                        <a href="https://www.facebook.com/X3N0.SH4R0F" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-all">
+                            <i class="fab fa-facebook-f mr-2"></i>
+                            ফেসবুকে ফলো করুন
+                        </a>
+                    </div>
+                    
+                    <div class="border-t pt-4">
+                        <p class="text-gray-500">&copy; ২০২৫ নির্দেশিকা - AI প্রম্পট জেনারেটর</p>
+                        <p class="text-sm text-gray-400 mt-1">সর্বস্বত্ব সংরক্ষিত</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // App Configuration
+        const API_CONFIG = {
+            endpoint: 'https://openrouter.ai/api/v1/chat/completions',
+            apiKey: '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',
+            model: 'qwen/qwen3-32b:free'
+        };
+
+        // State Management
+        let currentSlide = 1;
+        let savedPrompts = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+        let currentPage = 'home';
+
+        // DOM Elements
+        const splashScreen = document.getElementById('splashScreen');
+        const onboardingModal = document.getElementById('onboardingModal');
+        const mainApp = document.getElementById('mainApp');
+        const userInput = document.getElementById('userInput');
+        const categorySelect = document.getElementById('categorySelect');
+        const generateBtn = document.getElementById('generateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const regenerateBtn = document.getElementById('regenerateBtn');
+        const loadingSection = document.getElementById('loadingSection');
+        const resultSection = document.getElementById('resultSection');
+        const errorSection = document.getElementById('errorSection');
+        const resultText = document.getElementById('resultText');
+        const copySuccess = document.getElementById('copySuccess');
+
+        // Templates
+        const templates = {
+            blog: "একটি আকর্ষণীয় ব্লগ পোস্ট লিখুন যা পাঠকদের আগ্রহী করে তুলবে",
+            article: "একটি তথ্যবহুল এবং গবেষণামূলক আর্টিকেল তৈরি করুন",
+            social: "সোশ্যাল মিডিয়ার জন্য একটি আকর্ষণীয় পোস্ট তৈরি করুন",
+            marketing: "একটি কার্যকর মার্কেটিং কপি তৈরি করুন যা গ্রাহকদের আকৃষ্ট করবে",
+            email: "একটি পেশাদার ইমেইল টেমপ্লেট তৈরি করুন",
+            proposal: "একটি ব্যবসায়িক প্রস্তাব তৈরি করুন",
+            lesson: "একটি শিক্ষামূলক পাঠ পরিকল্পনা তৈরি করুন",
+            quiz: "একটি ইন্টারেক্টিভ কুইজ তৈরি করুন",
+            explanation: "জটিল বিষয়ের সহজ ব্যাখ্যা তৈরি করুন",
+            code: "একটি নির্দিষ্ট কাজের জন্য কোড তৈরি করুন",
+            debug: "কোডের সমস্যা খুঁজে বের করুন এবং সমাধান দিন",
+            review: "কোডের গুণমান পর্যালোচনা করুন",
+            story: "একটি আকর্ষণীয় গল্প তৈরি করুন",
+            poem: "একটি সুন্দর কবিতা রচনা করুন",
+            design: "একটি সৃজনশীল ডিজাইন আইডিয়া তৈরি করুন",
+            summary: "দীর্ঘ টেক্সটের সংক্ষিপ্ত সারসংক্ষেপ তৈরি করুন",
+            translation: "একটি ভাষা থেকে অন্য ভাষায় অনুবাদ করুন",
+            qa: "প্রশ্ন-উত্তর সেশন তৈরি করুন"
+        };
+
+        // Category System Prompts
+        const categoryPrompts = {
+            'লেখালেখি': "আপনি একজন অভিজ্ঞ কন্টেন্ট রাইটার এবং SEO বিশেষজ্ঞ। আপনার কাজ হল আকর্ষণীয়, তথ্যবহুল এবং পাঠক-বান্ধব কন্টেন্ট তৈরি করা।",
+            'ব্যবসা': "আপনি একজন অভিজ্ঞ ব্যবসায়িক পরামর্শদাতা এবং মার্কেটিং বিশেষজ্ঞ। আপনার কাজ হল কার্যকর ব্যবসায়িক সমাধান প্রদান করা।",
+            'শিক্ষা': "আপনি একজন অভিজ্ঞ শিক্ষক এবং একাডেমিক বিশেষজ্ঞ। আপনার কাজ হল জ্ঞান সহজভাবে পৌঁছে দেওয়া।",
+            'প্রোগ্রামিং': "আপনি একজন সিনিয়র সফটওয়্যার ডেভেলপার এবং কোডিং বিশেষজ্ঞ। আপনার কাজ হল কার্যকর এবং পরিচ্ছন্ন কোড সমাধান প্রদান করা।",
+            'সৃজনশীল': "আপনি একজন সৃজনশীল লেখক এবং গল্পকার। আপনার কাজ হল কল্পনাপ্রসূত এবং আকর্ষণীয় কন্টেন্ট তৈরি করা।",
+            'সাধারণ': "আপনি একজন বিশেষজ্ঞ AI সহায়ক যিনি যেকোনো ধরনের কাজে সাহায্য করতে পারেন।"
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if it's first time visit
+            const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+            
+            // Show splash screen for 3 seconds
+            setTimeout(() => {
+                splashScreen.style.opacity = '0';
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    
+                    if (!hasSeenOnboarding) {
+                        onboardingModal.style.display = 'flex';
+                    } else {
+                        mainApp.style.display = 'block';
+                    }
+                }, 500);
+            }, 3000);
+
+            // Load saved prompts
+            loadHistory();
+        });
+
+        // Onboarding Functions
+        function nextSlide() {
+            if (currentSlide < 3) {
+                document.getElementById(`slide${currentSlide}`).classList.remove('active');
+                currentSlide++;
+                document.getElementById(`slide${currentSlide}`).classList.add('active');
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                document.getElementById(`slide${currentSlide}`).classList.remove('active');
+                currentSlide--;
+                document.getElementById(`slide${currentSlide}`).classList.add('active');
+            }
+        }
+
+        function startApp() {
+            localStorage.setItem('hasSeenOnboarding', 'true');
+            onboardingModal.style.display = 'none';
+            mainApp.style.display = 'block';
+        }
+
+        // Navigation Functions
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageName + 'Page').classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Find and activate current nav item
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                if (item.textContent.includes(getPageDisplayName(pageName))) {
+                    item.classList.add('active');
+                }
+            });
+            
+            currentPage = pageName;
+            
+            // Load page-specific content
+            if (pageName === 'history') {
+                loadHistory();
+            }
+        }
+
+        function getPageDisplayName(pageName) {
+            const names = {
+                'home': 'হোম',
+                'generator': 'জেনারেটর',
+                'history': 'হিস্টরি',
+                'templates': 'টেমপ্লেট'
+            };
+            return names[pageName] || pageName;
+        }
+
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            mobileNav.style.display = mobileNav.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Template Functions
+        function useTemplate(templateKey) {
+            const templateText = templates[templateKey];
+            if (templateText) {
+                showPage('generator');
+                document.getElementById('userInput').value = templateText;
+                document.getElementById('userInput').focus();
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            generateBtn.addEventListener('click', generatePrompt);
+            clearBtn.addEventListener('click', clearAll);
+            copyBtn.addEventListener('click', copyToClipboard);
+            saveBtn.addEventListener('click', savePrompt);
+            regenerateBtn.addEventListener('click', regeneratePrompt);
+
+            // Enter key support for textarea
+            userInput.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    generatePrompt();
+                }
+            });
+
+            // Search and filter functionality
+            const searchHistory = document.getElementById('searchHistory');
+            const filterCategory = document.getElementById('filterCategory');
+            
+            if (searchHistory) {
+                searchHistory.addEventListener('input', filterHistory);
+            }
+            if (filterCategory) {
+                filterCategory.addEventListener('change', filterHistory);
+            }
+        });
+
+        // Generate Prompt Function
+        async function generatePrompt() {
+            const inputText = userInput.value.trim();
+            const selectedCategory = categorySelect.value;
+            
+            if (!inputText) {
+                alert('অনুগ্রহ করে আপনার ধারণাটি লিখুন।');
+                return;
+            }
+
+            // Show loading state
+            showLoading();
+            hideError();
+            hideResult();
+
+            try {
+                // Create enhanced system prompt based on category
+                const baseSystemPrompt = `আপনি একজন বিশেষজ্ঞ প্রম্পট ইঞ্জিনিয়ার যিনি বাংলাদেশি ব্যবহারকারীদের সাহায্য করেন। আপনার কাজ হল ব্যবহারকারীর সাধারণ বা অস্পষ্ট ইনপুট থেকে একটি পেশাদার, কার্যকর এবং বিস্তারিত AI প্রম্পট তৈরি করা।
+
+${categoryPrompts[selectedCategory] || categoryPrompts['সাধারণ']}
+
+নিয়মাবলী:
+1. ব্যবহারকারীর মূল উদ্দেশ্য বুঝুন
+2. প্রম্পটে স্পষ্ট নির্দেশনা দিন
+3. প্রয়োজনীয় প্রসঙ্গ এবং বিস্তারিত যোগ করুন
+4. আউটপুট ফরম্যাট নির্দিষ্ট করুন
+5. উদাহরণ দিন যদি প্রয়োজন হয়
+6. প্রম্পটটি বাংলা এবং ইংরেজি উভয় ভাষায় কাজ করবে
+7. প্রম্পটটি যেন AI থেকে সর্বোচ্চ মানের আউটপুট পেতে সাহায্য করে
+
+আপনার তৈরি প্রম্পট অবশ্যই:
+- স্পষ্ট এবং নির্দিষ্ট হতে হবে
+- ব্যবহারকারীর প্রত্যাশা পূরণ করতে হবে
+- AI মডেলের জন্য সহজবোধ্য হতে হবে
+- পেশাদার মানের হতে হবে
+
+শুধুমাত্র তৈরি করা প্রম্পটটি প্রদান করুন, কোনো অতিরিক্ত কথা বা ব্যাখ্যা নয়।`;
+
+                const response = await fetch(API_CONFIG.endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_CONFIG.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: API_CONFIG.model,
+                        messages: [
+                            {
+                                role: "system",
+                                content: baseSystemPrompt
+                            },
+                            {
+                                role: "user",
+                                content: `ক্যাটেগরি: ${selectedCategory}\nব্যবহারকারীর ইনপুট: ${inputText}`
+                            }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const generatedPrompt = data.choices[0].message.content.trim();
+                
+                // Store the latest prompt for regeneration
+                window.lastGeneratedPrompt = {
+                    input: inputText,
+                    category: selectedCategory,
+                    output: generatedPrompt
+                };
+                
+                // Display result
+                hideLoading();
+                showResult(generatedPrompt);
+
+            } catch (error) {
+                console.error('Error generating prompt:', error);
+                hideLoading();
+                showError();
+            }
+        }
+
+        // Regenerate Prompt Function
+        async function regeneratePrompt() {
+            if (window.lastGeneratedPrompt) {
+                userInput.value = window.lastGeneratedPrompt.input;
+                categorySelect.value = window.lastGeneratedPrompt.category;
+                await generatePrompt();
+            }
+        }
+
+        // Save Prompt Function
+        function savePrompt() {
+            if (!window.lastGeneratedPrompt) return;
+            
+            const promptData = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('bn-BD'),
+                category: window.lastGeneratedPrompt.category,
+                input: window.lastGeneratedPrompt.input,
+                output: window.lastGeneratedPrompt.output,
+                favorite: false
+            };
+            
+            savedPrompts.unshift(promptData);
+            localStorage.setItem('savedPrompts', JSON.stringify(savedPrompts));
+            
+            // Show success message
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-check mr-2"></i>সেভ হয়েছে!';
+            saveBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            saveBtn.classList.add('bg-green-500');
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.classList.remove('bg-green-500');
+                saveBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            }, 2000);
+        }
+
+        // History Functions
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            if (!historyList) return;
+            
+            if (savedPrompts.length === 0) {
+                historyList.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-history text-4xl mb-4"></i>
+                        <p class="text-lg">এখনো কোনো প্রম্পট সেভ করা হয়নি</p>
+                        <button onclick="showPage('generator')" class="btn-primary text-white px-6 py-2 rounded-lg mt-4">
+                            প্রথম প্রম্পট তৈরি করুন
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const historyHTML = savedPrompts.map(prompt => `
+                <div class="history-item bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center">
+                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">${prompt.category}</span>
+                            <span class="text-gray-500 text-sm ml-4">${prompt.date}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="toggleFavorite(${prompt.id})" class="text-yellow-500 hover:text-yellow-600">
+                                <i class="fas fa-star${prompt.favorite ? '' : '-o'}"></i>
+                            </button>
+                            <button onclick="deletePrompt(${prompt.id})" class="text-red-500 hover:text-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">মূল ইনপুট:</h4>
+                        <p class="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">${prompt.input}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">তৈরি হওয়া প্রম্পট:</h4>
+                        <p class="text-gray-700 bg-blue-50 p-4 rounded-lg">${prompt.output}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="copyText('${prompt.output.replace(/'/g, "\\'")}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-copy mr-1"></i> কপি করুন
+                        </button>
+                        <button onclick="reusePrompt('${prompt.input.replace(/'/g, "\\'")}', '${prompt.category}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-redo mr-1"></i> আবার ব্যবহার করুন
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            historyList.innerHTML = historyHTML;
+        }
+
+        function filterHistory() {
+            const searchTerm = document.getElementById('searchHistory').value.toLowerCase();
+            const categoryFilter = document.getElementById('filterCategory').value;
+            
+            let filteredPrompts = savedPrompts;
+            
+            if (searchTerm) {
+                filteredPrompts = filteredPrompts.filter(prompt => 
+                    prompt.input.toLowerCase().includes(searchTerm) ||
+                    prompt.output.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (categoryFilter) {
+                filteredPrompts = filteredPrompts.filter(prompt => 
+                    prompt.category === categoryFilter
+                );
+            }
+            
+            // Update display with filtered results
+            const historyList = document.getElementById('historyList');
+            if (filteredPrompts.length === 0) {
+                historyList.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-search text-4xl mb-4"></i>
+                        <p class="text-lg">কোনো ফলাফল পাওয়া যায়নি</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const historyHTML = filteredPrompts.map(prompt => `
+                <div class="history-item bg-white rounded-2xl shadow-lg p-6">
+                    <!-- Same HTML structure as in loadHistory -->
+                </div>
+            `).join('');
+            
+            historyList.innerHTML = historyHTML;
+        }
+
+        function toggleFavorite(id) {
+            const prompt = savedPrompts.find(p => p.id === id);
+            if (prompt) {
+                prompt.favorite = !prompt.favorite;
+                localStorage.setItem('savedPrompts', JSON.stringify(savedPrompts));
+                loadHistory();
+            }
+        }
+
+        function deletePrompt(id) {
+            if (confirm('এই প্রম্পটটি মুছে ফেলতে চান?')) {
+                savedPrompts = savedPrompts.filter(p => p.id !== id);
+                localStorage.setItem('savedPrompts', JSON.stringify(savedPrompts));
+                loadHistory();
+            }
+        }
+
+        function reusePrompt(input, category) {
+            showPage('generator');
+            document.getElementById('userInput').value = input;
+            document.getElementById('categorySelect').value = category;
+        }
+
+        // UI Helper Functions
+        function showLoading() {
+            loadingSection.classList.remove('hidden');
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>তৈরি হচ্ছে...';
+        }
+
+        function hideLoading() {
+            loadingSection.classList.add('hidden');
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-magic mr-2"></i>প্রম্পট তৈরি করুন';
+        }
+
+        function showResult(prompt) {
+            resultText.textContent = prompt;
+            resultSection.classList.remove('hidden');
+        }
+
+        function hideResult() {
+            resultSection.classList.add('hidden');
+        }
+
+        function showError() {
+            errorSection.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorSection.classList.add('hidden');
+        }
+
+        function clearAll() {
+            userInput.value = '';
+            categorySelect.value = 'সাধারণ';
+            hideResult();
+            hideError();
+            copySuccess.classList.add('hidden');
+            userInput.focus();
+        }
+
+        async function copyToClipboard() {
+            try {
+                const textToCopy = resultText.textContent;
+                await navigator.clipboard.writeText(textToCopy);
+                showCopySuccess();
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = resultText.textContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopySuccess();
+                } catch (fallbackErr) {
+                    alert('কপি করতে সমস্যা হচ্ছে। ম্যানুয়ালি সিলেক্ট করে কপি করুন।');
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show temporary success message
+                const event = new CustomEvent('showToast', { detail: 'কপি হয়েছে!' });
+                document.dispatchEvent(event);
+            });
+        }
+
+        function showCopySuccess() {
+            copySuccess.classList.remove('hidden');
+            setTimeout(() => {
+                copySuccess.classList.add('hidden');
+            }, 3000);
+        }
+
+        // PWA Support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript,console.log("Service Worker registered")');
+        }
+
+        // Mobile optimizations
+        function adjustForMobile() {
+            if (window.innerWidth <= 768) {
+                document.body.style.fontSize = '16px';
+            }
+        }
+
+        window.addEventListener('resize', adjustForMobile);
+        adjustForMobile();
+
+        // Add help button functionality
+        function showOnboarding() {
+            onboardingModal.style.display = 'flex';
+            currentSlide = 1;
+            document.querySelectorAll('.onboarding-slide').forEach(slide => slide.classList.remove('active'));
+            document.getElementById('slide1').classList.add('active');
+        }
+    </script>
+</body>
+</html>
